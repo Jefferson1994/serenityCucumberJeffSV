@@ -1,0 +1,66 @@
+defaultTasks 'clean','test','aggregate'
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+buildscript {
+    project.ext{
+        serenityCoreVersion='2.2.12'
+    }
+
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath("net.serenity-bdd:serenity-gradle-plugin:2.1.7")
+    }
+
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'net.serenity-bdd.aggregator'
+apply from: "$rootDir/gradle/libraries.gradle"
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+/**
+ * This is needed to make sure there are no Cucumber 2 dependencies in the classpath.
+ */
+configurations.all {
+    resolutionStrategy {
+        force "io.cucumber:cucumber-core:${cucumberVersion}"
+    }
+}
+dependencies {
+    def serenityVersion = '3.6.23'
+    testImplementation "net.serenity-bdd:serenity-screenplay:${serenityVersion}"
+
+    testImplementation "net.serenity-bdd:serenity-core:${'3.6.23'}"
+    testImplementation "net.serenity-bdd:serenity-cucumber:${'3.6.23'}"
+    //testImplementation "net.serenity-bdd:serenity-screenplay:${'3.6.23'}"
+    testImplementation "net.serenity-bdd:serenity-screenplay-webdriver:${serenityVersion}"
+    testImplementation "net.serenity-bdd:serenity-ensure:${serenity_version}"
+    testImplementation "org.junit.platform:junit-platform-launcher:${junit_platform_launcher_version}"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumber_junit_platform_engine_version}"
+    testImplementation "org.junit.platform:junit-platform-suite:${junit_platform_suite_version}"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:${junit_jupiter_engine_version}"
+    testImplementation "org.junit.vintage:junit-vintage-engine:${junit_vintage_engine_version}"
+    implementation "ch.qos.logback:logback-classic:${logback_classic_version}"
+    testImplementation "org.assertj:assertj-core:${assertj_core_version}"
+}
+
+test {
+    testLogging.showStandardStreams = true
+    systemProperties System.getProperties()
+}
+
+gradle.startParameter.continueOnFailure = true
+
+test.finalizedBy(aggregate)
